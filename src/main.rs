@@ -1,12 +1,22 @@
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct Event {
     event_type: String,
     from: String,
     to: String,
     amount: u64,
+}
+
+impl fmt::Debug for Event {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Event {{ type: {}, from: {}, to: {}, amount: {} }}",
+            self.event_type, self.from, self.to, self.amount
+        )
+    }
 }
 
 struct TokenContract {
@@ -149,6 +159,26 @@ impl TokenContract {
     fn get_events(&self) -> &[Event] {
         &self.events
     }
+
+    fn print_event_summary(&self) {
+        let mut transfer_volume = 0;
+        let mut mint_volume = 0;
+        let mut burn_volume = 0;
+
+        for event in &self.events {
+            match event.event_type.as_str() {
+                "Transfer" | "TransferFrom" => transfer_volume += event.amount,
+                "Mint" => mint_volume += event.amount,
+                "Burn" => burn_volume += event.amount,
+                _ => {}
+            }
+        }
+
+        println!("Event Summary:");
+        println!("Total Transfer Volume: {}", transfer_volume);
+        println!("Total Minted: {}", mint_volume);
+        println!("Total Burned: {}", burn_volume);
+    }
 }
 
 impl fmt::Debug for TokenContract {
@@ -188,4 +218,7 @@ fn main() {
     for event in token.get_events() {
         println!("{:?}", event);
     }
+
+    // Print event summary
+    token.print_event_summary();
 }
