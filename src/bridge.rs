@@ -47,14 +47,11 @@ mod bridge {
         pub fn lock(&mut self, target_chain: u32, target_address: [u8; 32], amount: Balance) -> Result<(), &'static str> {
             let caller = self.env().caller();
 
-            // Transfer the tokens from caller to the contract (lock the tokens)
             self.transfer_from(caller, self.env().account_id(), amount)?;
 
-            // Record the locked tokens
             let current_locked = self.locked_tokens.get(&caller).unwrap_or(0);
             self.locked_tokens.insert(&caller, &(current_locked + amount));
 
-            // Emit Locked event
             self.env().emit_event(Locked {
                 from: caller,
                 amount,
@@ -74,18 +71,14 @@ mod bridge {
                 return Err("Only admin can unlock tokens");
             }
 
-            // Transfer the tokens back to the user
             self.transfer_from(self.env().account_id(), to, amount)?;
 
-            // Emit Unlocked event
             self.env().emit_event(Unlocked { to, amount });
 
             Ok(())
         }
 
         fn transfer_from(&self, from: AccountId, to: AccountId, amount: Balance) -> Result<(), &'static str> {
-            // Implement the logic to transfer tokens between accounts
-            // This would typically involve calling an ERC-20 transfer function
             Ok(())
         }
 
