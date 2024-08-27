@@ -101,9 +101,20 @@ mod betting {
             }
         }
 
-        fn distribute_rewards(&self) {
-            // Additional reward distribution logic can be implemented here.
-            // This function could also be called inside `select_winner` if needed.
+        fn distribute_rewards(&mut self) {
+            if let Some(winning_option) = self.winner {
+                let payout_ratio = match winning_option {
+                    BetOption::Option1 => self.total_amount / self.option1_amount,
+                    BetOption::Option2 => self.total_amount / self.option2_amount,
+                };
+        
+                for (account, bet) in self.bets.iter() {
+                    if bet.option == winning_option {
+                        let payout = bet.amount * payout_ratio;
+                        self.env().transfer(*account, payout).expect("Transfer failed");
+                    }
+                }
+            }
         }
     }
 }
