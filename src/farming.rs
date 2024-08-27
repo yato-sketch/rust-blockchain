@@ -20,7 +20,7 @@ mod farming {
     #[ink(storage)]
     pub struct Farming {
         total_staked: Balance,
-        reward_rate: Balance, // Reward per block or per second
+        reward_rate: Balance,
         stakers: StorageHashMap<AccountId, StakeInfo>,
     }
 
@@ -41,10 +41,8 @@ mod farming {
 
             let mut stake_info = self.stakers.get(&caller).cloned().unwrap_or_default();
 
-            // Calculate pending rewards
             let pending = self.pending_reward(&caller);
 
-            // Update stake info
             stake_info.amount += amount;
             stake_info.reward_debt += pending;
             stake_info.last_staked = block_number;
@@ -60,13 +58,10 @@ mod farming {
 
             let mut stake_info = self.stakers.get(&caller).cloned().expect("No stake found");
 
-            // Ensure the user has enough staked
             assert!(stake_info.amount >= amount, "Insufficient staked balance");
 
-            // Calculate pending rewards
             let pending = self.pending_reward(&caller);
 
-            // Update stake info
             stake_info.amount -= amount;
             stake_info.reward_debt += pending;
             stake_info.last_staked = block_number;
@@ -82,12 +77,10 @@ mod farming {
 
             let mut stake_info = self.stakers.get(&caller).cloned().expect("No stake found");
 
-            // Transfer the pending rewards
             self.env()
                 .transfer(caller, pending)
                 .expect("Transfer failed");
 
-            // Update reward debt
             stake_info.reward_debt = 0;
             self.stakers.insert(caller, stake_info);
         }
